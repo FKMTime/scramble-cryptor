@@ -9,10 +9,11 @@ export const encryptScrambles = async (wcif: WCIF, passwords: ScramblePassword[]
                 continue;
             }
             for (const set of round.scrambleSets) {
+                let i = 1;
                 const password = passwords.find(password => {
                     return password.eventId === event.id &&
                         password.roundId === round.id &&
-                        password.setId === set.id;
+                        password.setId === i
                 });
                 if (password) {
                     const newScrambles = [];
@@ -26,6 +27,7 @@ export const encryptScrambles = async (wcif: WCIF, passwords: ScramblePassword[]
                     set.scrambles = newScrambles;
                     set.extraScrambles = newExtraScrambles;
                 }
+                i++;
             }
         }
     }
