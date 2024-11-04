@@ -10,6 +10,7 @@ import { encryptScrambles } from "./logic/scrambles";
 import { toaster } from "@/components/ui/toaster"
 
 const App = () => {
+  const [originalFileName, setOriginalFileName] = useState<string>("");
   const [wcif, setWcif] = useState<WCIF | null>(null);
   const [scramblePasswords, setScramblePasswords] = useState<ScramblePassword[]>([]);
   const [jsonFileKey, setJsonFileKey] = useState(0);
@@ -21,6 +22,7 @@ const App = () => {
     const file = details.files[0];
     const reader = new FileReader();
     reader.onload = () => {
+      setOriginalFileName(file.name);
       const result = reader.result as string;
       const parsedJson = JSON.parse(result);
       setWcif(parsedJson.wcif);
@@ -60,7 +62,7 @@ const App = () => {
     a.setAttribute("style", "display: none");
     const url = URL.createObjectURL(file);
     a.setAttribute("href", url);
-    a.setAttribute("download", "encrypted_wcif.json");
+    a.setAttribute("download", `ENCRYPTED - ${originalFileName}`);
     a.click();
     window.URL.revokeObjectURL(url);
     setWcif(null);
