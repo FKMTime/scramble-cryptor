@@ -6,7 +6,7 @@ import { Toaster } from "./components/ui/toaster";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <ChakraProvider value={defaultSystem}>
-    <ColorModeProvider>
+    <ColorModeProvider forcedTheme="dark">
       <App />
       <Toaster />
     </ColorModeProvider>

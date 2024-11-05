@@ -1,4 +1,4 @@
-import { Box, Fieldset, Heading, Stack } from "@chakra-ui/react";
+import { Box, Fieldset, Heading, List, Stack } from "@chakra-ui/react";
 import logo from "@/assets/logo.svg";
 import { FileUploadDropzone, FileUploadList, FileUploadRoot } from "@/components/ui/file-button";
 import { Button } from "@/components/ui/button";
@@ -67,7 +67,7 @@ const App = () => {
     window.URL.revokeObjectURL(url);
     setWcif(null);
     setScramblePasswords([]);
-    toaster.create({title: "Success", description: "Scrambles encrypted successfully", type: "success"});
+    toaster.create({ title: "Success", description: "Scrambles encrypted successfully", type: "success" });
     setTimeout(() => {
       a.remove();
       setJsonFileKey(prev => prev + 1);
@@ -86,6 +86,14 @@ const App = () => {
             <Fieldset.HelperText>
               Please upload scrambles JSON and TXT file with passwords.
             </Fieldset.HelperText>
+            <List.Root textAlign="left" color="gray.300">
+              <List.Item>
+                JSON file is located in Interchange folder - this is the same you upload to Scrambles Matcher
+              </List.Item>
+              <List.Item>
+                TXT file is located in root folder - this is the same you use to give passwords for scramblers
+              </List.Item>
+            </List.Root>
           </Stack>
           <Box display="flex" alignItems="center" width="100%" gap={2} pr={3}>
             <Field label="Scrambles JSON">
