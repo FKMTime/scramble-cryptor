@@ -8,6 +8,7 @@ import { useState } from "react";
 import { getWCIFFromName } from "./logic/utils";
 import { encryptScrambles } from "./logic/scrambles";
 import { toaster } from "@/components/ui/toaster"
+import { invoke } from "@tauri-apps/api/core";
 
 const App = () => {
   const [originalFileName, setOriginalFileName] = useState<string>("");
@@ -57,22 +58,21 @@ const App = () => {
   const handleDownload = async () => {
     if (!wcif) return;
     const newWcif = await encryptScrambles(wcif, scramblePasswords);
-    const file = new Blob([JSON.stringify({ wcif: newWcif })], { type: "application/json" });
-    const a = document.body.appendChild(document.createElement("a"));
-    a.setAttribute("style", "display: none");
-    const url = URL.createObjectURL(file);
-    a.setAttribute("href", url);
-    a.setAttribute("download", `ENCRYPTED - ${originalFileName}`);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    setWcif(null);
-    setScramblePasswords([]);
-    toaster.create({ title: "Success", description: "Scrambles encrypted successfully", type: "success" });
-    setTimeout(() => {
-      a.remove();
-      setJsonFileKey(prev => prev + 1);
-      setTxtFileKey(prev => prev + 1);
-    }, 1000);
+    const fileContent = JSON.stringify({ wcif: newWcif });
+    const fileName = `ENCRYPTED - ${originalFileName}`;
+    const response: string = await invoke("save_encrypted_scrambles", { json: fileContent, fileName });
+    if (response.includes("Error")) {
+      toaster.create({ title: "Error", description: "Failed to encrypt scrambles", type: "error" });
+      toaster.create({ title: "Error", description: response, type: "error" });
+    } else {
+      toaster.create({ title: "Success", description: "Scrambles encrypted successfully", type: "success" });
+      setTimeout(() => {
+        setWcif(null);
+        setScramblePasswords([]);
+        setJsonFileKey(prev => prev + 1);
+        setTxtFileKey(prev => prev + 1);
+      }, 1000);
+    }
   };
 
   return (
