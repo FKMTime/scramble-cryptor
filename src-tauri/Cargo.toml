@@ -1,6 +1,6 @@
 [package]
 name = "scramble-cryptor"
-version = "0.1.2"
+version = "0.2.0"
 description = "FKMTime app for encrypting scrambles"
 authors = ["FKMTime"]
 edition = "2021"
