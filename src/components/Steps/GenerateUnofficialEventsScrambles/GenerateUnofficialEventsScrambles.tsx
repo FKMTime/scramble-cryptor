@@ -1,11 +1,17 @@
 import { eventsData } from "@/lib/events"
-import { useState } from "react";
 import { UnofficialEvent, UnofficialEventRound } from "@/lib/interfaces";
 import UnofficialEventCard from "./UnofficialEventCard";
 
-const GenerateUnofficialEventsScrambles = () => {
+interface GenerateUnofficialEventsScramblesProps {
+    selectedEvents: UnofficialEvent[];
+    setSelectedEvents: (events: UnofficialEvent[]) => void;
+}
+
+const GenerateUnofficialEventsScrambles = ({
+    selectedEvents,
+    setSelectedEvents,
+}: GenerateUnofficialEventsScramblesProps) => {
     const unofficialEvents = eventsData.filter(event => event.isUnofficial);
-    const [selectedEvents, setSelectedEvents] = useState<UnofficialEvent[]>([]);
 
     const addRound = (eventId: string) => {
         const event = selectedEvents.find(event => event.id === eventId);
@@ -15,8 +21,7 @@ const GenerateUnofficialEventsScrambles = () => {
                 id: `${eventId}-r${event.rounds.length + 1}`,
                 format: eventData?.preferredFormat ? eventData.preferredFormat : "a",
                 scrambleSetCount: 1,
-                scrambles: [],
-                extraScrambles: [],
+                scrambleSets: [],
             });
             setSelectedEvents([...selectedEvents]);
         } else {
@@ -29,8 +34,7 @@ const GenerateUnofficialEventsScrambles = () => {
                             id: `${eventId}-r1`,
                             format: eventData?.preferredFormat ? eventData.preferredFormat : "a",
                             scrambleSetCount: 1,
-                            scrambles: [],
-                            extraScrambles: [],
+                            scrambleSets: [],
                         },
                     ],
                 },
@@ -58,21 +62,21 @@ const GenerateUnofficialEventsScrambles = () => {
     return (
         <>
             <div className="flex flex-col">
-
                 <h2 className="text-lg">
-                    Generate unofficial events scrambles
+                    Select unofficial for which you need scrambles
                 </h2>
                 <p className="text-muted-foreground">
                     They will be encrypted and added to final JSON. Feel free to skip this step if you don't plan to hold any of these events.
                 </p>
             </div>
             {unofficialEvents.map((eventData) => (
-                <UnofficialEventCard 
-                eventData={eventData} 
-                selectedEvents={selectedEvents}
+                <UnofficialEventCard
+                    eventData={eventData}
+                    selectedEvents={selectedEvents}
                     addRound={addRound}
-                     updateRound={updateRound}
-                      deleteRound={deleteRound} />
+                    updateRound={updateRound}
+                    deleteRound={deleteRound}
+                />
             ))}
         </>
     );

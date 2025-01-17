@@ -14,12 +14,18 @@ export interface UnofficialEventRound {
     id: string;
     format: string;
     scrambleSetCount: number;
+    scrambleSets: UnofficialEventScrambleSet[];
+}
+
+export interface UnofficialEventScrambleSet {
+    id: number;
     scrambles: string[];
     extraScrambles: string[];
 }
 
 export interface EventData {
     id: string;
+    scramblingId?: string;
     name: string;
     icon: string;
     shortName?: string;

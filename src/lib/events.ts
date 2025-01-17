@@ -4,7 +4,7 @@ import { EventData } from "./interfaces";
 export const eventsData: EventData[] = [
   {
     id: "333",
-    name: "3x3x3 Cube",
+    name: "3x3x3",
     shortName: "3x3x3",
     icon: "event-333",
     useInspection: true,
@@ -13,7 +13,7 @@ export const eventsData: EventData[] = [
   },
   {
     id: "222",
-    name: "2x2x2 Cube",
+    name: "2x2x2",
     shortName: "2x2x2",
     icon: "event-222",
     useInspection: true,
@@ -22,7 +22,7 @@ export const eventsData: EventData[] = [
   },
   {
     id: "444",
-    name: "4x4x4 Cube",
+    name: "4x4x4",
     shortName: "4x4x4",
     icon: "event-444",
     useInspection: true,
@@ -31,7 +31,7 @@ export const eventsData: EventData[] = [
   },
   {
     id: "555",
-    name: "5x5x5 Cube",
+    name: "5x5x5",
     shortName: "5x5x5",
     icon: "event-555",
     useInspection: true,
@@ -40,7 +40,7 @@ export const eventsData: EventData[] = [
   },
   {
     id: "666",
-    name: "6x6x6 Cube",
+    name: "6x6x6",
     shortName: "6x6x6",
     icon: "event-666",
     useInspection: true,
@@ -50,7 +50,7 @@ export const eventsData: EventData[] = [
   },
   {
     id: "777",
-    name: "7x7x7 Cube",
+    name: "7x7x7",
     shortName: "7x7x7",
     icon: "event-777",
     useInspection: true,
@@ -165,6 +165,7 @@ export const eventsData: EventData[] = [
   },
   {
     id: "mirror",
+    scramblingId: "333",
     name: "Mirror blocks",
     shortName: "Mirror",
     icon: "unofficial-333_mirror_blocks",
@@ -174,6 +175,21 @@ export const eventsData: EventData[] = [
     usualExtraScramblesCount: 2,
   },
 ];
+
+export const formats = ["a", "m", "3"];
+
+export const prettyEventFormat = (format: string) => {
+  switch (format) {
+    case "a":
+      return "Average of 5";
+    case "m":
+      return "Mean of 3";
+    case "3":
+      return "Best of 3";
+    default:
+      return "Unknown";
+  }
+}
 
 export const isUnofficialEvent = (eventId: string) => {
   return eventsData.find((event) => event.id === eventId)?.isUnofficial;
