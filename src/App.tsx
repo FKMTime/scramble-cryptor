@@ -1,40 +1,40 @@
-import { Box, Fieldset, Heading, List, Stack } from "@chakra-ui/react";
 import logo from "@/assets/logo.svg";
-import { FileUploadDropzone, FileUploadList, FileUploadRoot } from "@/components/ui/file-button";
-import { Button } from "@/components/ui/button";
-import { Field } from "./components/ui/field";
 import { Competition as WCIF } from "@wca/helpers";
 import { useState } from "react";
-import { getWCIFFromName } from "./logic/utils";
-import { encryptScrambles } from "./logic/scrambles";
-import { toaster } from "@/components/ui/toaster"
+import { getWCIFFromName } from "./lib/utils";
+import { encryptScrambles } from "./lib/scrambles";
 import { invoke } from "@tauri-apps/api/core";
+import { useToast } from "./hooks/use-toast";
+import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
+import { Progress } from "./components/ui/progress";
+import UploadScrambles from "./components/Steps/UploadScrambles/UploadScrambles";
+import { Button } from "./components/ui/button";
+import GenerateUnofficialEventsScrambles from "./components/Steps/GenerateUnofficialEventsScrambles/GenerateUnofficialEventsScrambles";
+
+const MAX_STEPS = 3;
 
 const App = () => {
+  const { toast } = useToast();
   const [originalFileName, setOriginalFileName] = useState<string>("");
   const [wcif, setWcif] = useState<WCIF | null>(null);
   const [scramblePasswords, setScramblePasswords] = useState<ScramblePassword[]>([]);
   const [jsonFileKey, setJsonFileKey] = useState(0);
   const [txtFileKey, setTxtFileKey] = useState(0);
+  const [step, setStep] = useState(1);
 
-  const handleJSONUpload = (details: {
-    files: File[];
-  }) => {
-    const file = details.files[0];
+  const handleJSONUpload = (file: File) => {
     const reader = new FileReader();
     reader.onload = () => {
       setOriginalFileName(file.name);
       const result = reader.result as string;
       const parsedJson = JSON.parse(result);
+      console.log(parsedJson);
       setWcif(parsedJson.wcif);
     };
     reader.readAsText(file);
   };
 
-  const handleTXTUpload = (details: {
-    files: File[];
-  }) => {
-    const file = details.files[0];
+  const handleTXTUpload = (file: File) => {
     const reader = new FileReader();
     reader.onload = () => {
       const result = reader.result as string;
@@ -62,10 +62,22 @@ const App = () => {
     const fileName = `ENCRYPTED - ${originalFileName}`;
     const response: string = await invoke("save_encrypted_scrambles", { json: fileContent, fileName });
     if (response.includes("Error")) {
-      toaster.create({ title: "Error", description: "Failed to encrypt scrambles", type: "error" });
-      toaster.create({ title: "Error", description: response, type: "error" });
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to encrypt scrambles",
+      });
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: response,
+      })
     } else {
-      toaster.create({ title: "Success", description: "Scrambles encrypted successfully", type: "success" });
+      toast({
+        variant: "success",
+        title: "Success",
+        description: "Scrambles encrypted successfully",
+      });
       setTimeout(() => {
         setWcif(null);
         setScramblePasswords([]);
@@ -75,66 +87,62 @@ const App = () => {
     }
   };
 
+  const handleNextStep = () => {
+    if (step < MAX_STEPS) {
+      setStep(prev => prev + 1);
+    }
+  };
+
+  const handlePreviousStep = () => {
+    if (step > 1) {
+      setStep(prev => prev - 1);
+    }
+  };
+
+  const nextStepAllowed = () => {
+    if (step === 1) {
+      return wcif !== null && scramblePasswords.length > 0;
+    } else if (step < MAX_STEPS) {
+      return true;
+    }
+  };
+
+  const previousStepAllowed = () => {
+    return step > 1;
+  };
+
   return (
-    <Box backgroundColor="#2D3748" width="100vw" height="100vh" display="flex" flexDirection="column" alignItems="center" textAlign="center" pt={5}>
-      <Heading color="white" size="3xl">scramble-cryptor</Heading>
-      <img src={logo} alt="logo" width="200" height="200" />
-      <Box display="flex" backgroundColor="gray.900" width="fit-content" height="fit-content" flexDirection="column" m={10} borderRadius="md" boxShadow="lg" p={5} borderColor="gray.800">
-        <Fieldset.Root size="lg" maxW="md">
-          <Stack alignItems="flex-start">
-            <Fieldset.Legend>Encrypt scrambles</Fieldset.Legend>
-            <Fieldset.HelperText>
-              Please upload scrambles JSON and TXT file with passwords.
-            </Fieldset.HelperText>
-            <List.Root textAlign="left" color="gray.300">
-              <List.Item>
-                JSON file is located in Interchange folder - this is the same you upload to Scrambles Matcher
-              </List.Item>
-              <List.Item>
-                TXT file is located in root folder - this is the same you use to give passwords for scramblers
-              </List.Item>
-            </List.Root>
-          </Stack>
-          <Box display="flex" alignItems="center" width="100%" gap={2} pr={3}>
-            <Field label="Scrambles JSON">
-              <FileUploadRoot maxW="xl" alignItems="stretch" accept=".json" width="100%" onFileAccept={handleJSONUpload} key={jsonFileKey}>
-                <FileUploadDropzone
-                  label="Drag and drop here to upload"
-                  description=".json"
-                />
-                <FileUploadList />
-              </FileUploadRoot>
-            </Field>
-            <Field label="Passwords TXT">
-              <FileUploadRoot maxW="xl" alignItems="stretch" accept=".txt" width="100%" onFileAccept={handleTXTUpload} key={txtFileKey}>
-                <FileUploadDropzone
-                  label="Drag and drop here to upload"
-                  description=".txt"
-                />
-                <FileUploadList />
-              </FileUploadRoot>
-            </Field>
-          </Box>
-        </Fieldset.Root>
-        <Box
-          display="flex"
-          width="100%"
-          flexDirection="column"
-          alignItems="flex-end"
-        >
-          <Button
-            variant="solid"
-            size="lg"
-            colorPalette="green"
-            width="fit-content"
-            mt={5}
-            onClick={handleDownload}
-          >
-            Download encrypted scrambles
-          </Button>
-        </Box>
-      </Box>
-    </Box>
+    <div className="w-screen h-screen flex items-center justify-center">
+      <Card className="w-1/2">
+        <CardHeader className="flex items-center">
+          <img src={logo} alt="logo" width="200" height="200" />
+          <CardTitle>
+            scramble-cryptor
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-5">
+          <Progress value={step} />
+          {step === 1 && (
+            <UploadScrambles
+              handleJSONUpload={handleJSONUpload}
+              handleTXTUpload={handleTXTUpload}
+            />
+          )}
+          {step === 2 && (
+            <GenerateUnofficialEventsScrambles />
+          )}
+          <div className="flex gap-3 justify-center">
+            <Button variant="destructive" onClick={handlePreviousStep} disabled={!previousStepAllowed()}>
+              Previous step
+            </Button>
+            <Button variant="success" onClick={handleNextStep} disabled={!nextStepAllowed()}>
+              Next step
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+    </div>
   );
 }
 
